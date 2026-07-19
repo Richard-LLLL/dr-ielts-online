@@ -1,0 +1,112 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+.nox/
+*.egg
+*.egg-info/
+
+# Environment
+.env
+.env.development
+.env.production
+.env.testing
+.env.local
+*.env.bak
+
+# Database
+*.db
+*.db.bak
+*.db-journal
+
+# IDE
+.vscode/
+.idea/
+.superpowers/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Uploads
+.uploads/
+data/uploads/
+
+# Backups
+*_backup_*/
+*_backup/
+
+# Temporary
+tmp_*
+*.tmp
+showcase_*.json
+embedded_sections.txt
+*.log
+
+# Project specific local backups
+product/backup/
+
+# Debug screenshots / snapshots / har dumps (do not commit local exploration artifacts)
+*.har
+*_snapshot.json
+*_snapshot.txt
+local_dashboard*.json
+local_dashboard*.png
+baicizhan_*.png
+baicizhan_*.json
+baizhan_*.png
+baizhan_*.json
+baizhan_*.txt
+dashboard_*.png
+mock_exam_*.png
+after_exit_click-*.png
+cookie_login_test.*
+cookie_test1.png
+listening_section.json
+login_snapshot.json
+
+# Browser profile caches created by scraper runs (very large, never commit)
+product/tests/baicizhan_profile/
+product/tests/*/Crashpad/
+product/tests/*/Default/
+product/tests/*/GrShaderCache/
+product/tests/*/ShaderCache/
+
+# One-off debug scripts in tests/ (keep test_*.py / conftest.py / __init__.py only)
+product/tests/debug_*.py
+product/tests/inspect_*.py
+product/tests/crawl_*.py
+product/tests/capture_*.py
+product/tests/extract_*.py
+product/tests/check_*.py
+product/tests/find_cdp*.py
+product/tests/import_receiver.py
+product/tests/verify_*.py
+
+# Scraping / demo artifacts already imported into the question bank
+product/tests/screenshots/写作/
+product/tests/screenshots/口语/
+product/tests/screenshots/听力/
+product/tests/screenshots/[0-9]*_*.png
+product/tests/screenshots/[0-9]*_*.txt
+product/tests/screenshots/*.har
+product/tests/screenshots/debug_*.png
+product/tests/screenshots/restart*.png
+product/tests/screenshots/library*.png
+product/tests/screenshots/login_check.png
+product/tests/screenshots/new_page_test.png
+product/tests/scrape_full_log.txt
+
+# Demo packages superseded by the real frontend
+product/frontend/demo-package/
+product/frontend/demo-package.zip

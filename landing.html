@@ -1,0 +1,2799 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Dr. IELTS — 开源的 AI 雅思学习系统。多 Agent 协作，诊断、计划、训练、反馈、再诊断，形成提分闭环。">
+  <title>Dr. IELTS — 开源的 AI 雅思学习系统</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+/* ============================================
+   Dr. IELTS Landing Page
+   色板：H182 青色系分层 + 邻近深蓝对比 + 暖橙点缀
+   字体：思源黑体 (Noto Sans SC)
+   ============================================ */
+
+:root {
+  /* ---- 主色：H182 青色系（按饱和度/明度分层级）---- */
+  --color-primary: #05AFB5;          /* 标准主青 H182 S97 B71 —— 按钮高亮、链接、强调 */
+  --color-primary-dark: #047B80;     /* 深主青   H182 S97 B50 —— 深色区块、hover */
+  --color-primary-light: #CEEFF0;    /* 浅辅助青 H182 S14 B94 —— 卡片淡背景、气泡 */
+  --color-primary-softer: #E8F7F8;   /* 更浅青（派生）—— 大面积淡背景过渡 */
+
+  /* ---- 强调：邻近深蓝 H205（行动按钮，柔和对比）---- */
+  --color-cta: #233D4F;              /* 深蓝 H205 S56 B31 —— 主行动按钮 */
+  --color-cta-hover: #2E4F66;        /* 深蓝 hover（派生提亮） */
+
+  /* ---- 基础色 ---- */
+  --color-bg: #FFFFFF;               /* 纯白底色 */
+  --color-bg-soft: #F7F9FA;          /* 浅灰白 —— 卡片底 */
+  --color-text-primary: #1F2A2E;     /* 深灰（偏青）—— 标题正文 */
+  --color-text-secondary: #57636A;   /* 深灰 —— 小字 */
+  --color-text-tertiary: #9AA5AB;    /* 浅灰 —— 辅助说明 */
+  --color-border: rgba(4, 123, 128, 0.12);   /* 带青色调的边框 */
+  --color-border-light: rgba(4, 123, 128, 0.06);
+
+  /* ---- 点缀：暖橙（仅进度条、小标记）---- */
+  --color-warm: #F59E0B;             /* 暖橙 —— 进度条、状态点 */
+  --color-warm-light: #FEF3C7;       /* 暖橙浅（派生） */
+
+  /* 阴影（带青色调，更融入主色） */
+  --shadow-sm: 0 1px 2px rgba(4, 123, 128, 0.06), 0 1px 3px rgba(4, 123, 128, 0.04);
+  --shadow-md: 0 4px 12px rgba(4, 123, 128, 0.08), 0 2px 4px rgba(4, 123, 128, 0.05);
+  --shadow-lg: 0 12px 32px rgba(4, 123, 128, 0.10), 0 4px 8px rgba(4, 123, 128, 0.06);
+  --shadow-xl: 0 24px 48px rgba(35, 61, 79, 0.14);
+
+  /* 圆角 */
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 24px;
+  --radius-full: 9999px;
+
+  /* 间距 */
+  --space-4: 4px;
+  --space-8: 8px;
+  --space-12: 12px;
+  --space-16: 16px;
+  --space-20: 20px;
+  --space-24: 24px;
+  --space-32: 32px;
+  --space-48: 48px;
+  --space-64: 64px;
+  --space-80: 80px;
+  --space-120: 120px;
+
+  /* 动画 */
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --duration-fast: 150ms;
+  --duration-normal: 300ms;
+  --duration-slow: 600ms;
+}
+
+/* ============================================
+   Base
+   ============================================ */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  font-size: 16px;
+  scroll-behavior: smooth;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  font-family: 'Noto Sans SC', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  font-size: 1rem;
+  line-height: 1.6;
+  color: var(--color-text-primary);
+  background-color: var(--color-bg);
+  overflow-x: hidden;
+}
+
+img {
+  max-width: 100%;
+  height: auto;
+  display: block;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+button {
+  font-family: inherit;
+  cursor: pointer;
+  border: none;
+  background: none;
+}
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 var(--space-24);
+}
+
+/* ============================================
+   Typography
+   ============================================ */
+
+h1, h2, h3, h4, h5, h6 {
+  font-weight: 600;
+  line-height: 1.2;
+  color: var(--color-text-primary);
+}
+
+h1 { font-size: 3.5rem; }
+h2 { font-size: 2.5rem; }
+h3 { font-size: 1.5rem; }
+h4 { font-size: 1.25rem; }
+
+/* ============================================
+   Navigation
+   ============================================ */
+
+.nav {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--color-border-light);
+  transition: all var(--duration-normal) var(--ease-out);
+}
+
+.nav__inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 72px;
+}
+
+.nav__logo {
+  display: flex;
+  align-items: center;
+  gap: var(--space-12);
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--color-text-primary);
+}
+
+.nav__logo svg {
+  width: 32px;
+  height: 32px;
+  color: var(--color-primary);
+}
+
+.nav__links {
+  display: flex;
+  align-items: center;
+  gap: var(--space-32);
+}
+
+.nav__link {
+  font-size: 0.9375rem;
+  font-weight: 500;
+  color: var(--color-text-secondary);
+  transition: color var(--duration-fast) var(--ease-out);
+}
+
+.nav__link:hover {
+  color: var(--color-primary);
+}
+
+.nav__actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-16);
+}
+
+/* ============================================
+   Buttons
+   ============================================ */
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-8);
+  padding: var(--space-12) var(--space-24);
+  font-size: 0.9375rem;
+  font-weight: 500;
+  line-height: 1;
+  border-radius: var(--radius-md);
+  transition: all var(--duration-fast) var(--ease-out);
+  white-space: nowrap;
+}
+
+/* 主按钮：标准主青（高亮） */
+.btn--primary {
+  background: var(--color-primary);
+  color: #fff;
+  box-shadow: 0 2px 8px rgba(5, 175, 181, 0.28);
+}
+
+.btn--primary:hover {
+  background: var(--color-primary-dark);
+  box-shadow: 0 4px 16px rgba(4, 123, 128, 0.36);
+  transform: translateY(-1px);
+}
+
+/* CTA 按钮：邻近深蓝（柔和对比，用于关键行动） */
+.btn--cta {
+  background: var(--color-cta);
+  color: #fff;
+  box-shadow: 0 2px 8px rgba(35, 61, 79, 0.24);
+}
+
+.btn--cta:hover {
+  background: var(--color-cta-hover);
+  box-shadow: 0 4px 16px rgba(35, 61, 79, 0.32);
+  transform: translateY(-1px);
+}
+
+.btn--ghost {
+  background: transparent;
+  color: var(--color-text-secondary);
+  border: 1px solid var(--color-border);
+}
+
+.btn--ghost:hover {
+  background: var(--color-bg-soft);
+  color: var(--color-primary-dark);
+  border-color: var(--color-primary);
+}
+
+.btn--text {
+  background: transparent;
+  color: var(--color-text-secondary);
+  padding: var(--space-8) var(--space-16);
+}
+
+.btn--text:hover {
+  color: var(--color-primary);
+}
+
+.btn--large {
+  padding: var(--space-16) var(--space-32);
+  font-size: 1rem;
+}
+
+.btn--small {
+  padding: var(--space-8) var(--space-16);
+  font-size: 0.875rem;
+}
+
+.btn svg {
+  width: 18px;
+  height: 18px;
+}
+
+/* Magnetic effect for primary CTA */
+.magnetic {
+  position: relative;
+  overflow: hidden;
+}
+
+.magnetic::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(255,255,255,0.2) 0%, transparent 50%);
+  opacity: 0;
+  transition: opacity var(--duration-normal) var(--ease-out);
+}
+
+.magnetic:hover::before {
+  opacity: 1;
+}
+
+/* ============================================
+   Hero Section
+   ============================================ */
+
+.hero {
+  position: relative;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  padding: var(--space-120) 0 var(--space-80);
+  overflow: hidden;
+  background: var(--color-bg);
+}
+
+.hero__bg {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+}
+
+.hero__bg-gradient {
+  position: absolute;
+  top: -50%;
+  right: -20%;
+  width: 80%;
+  height: 100%;
+  background: radial-gradient(circle, var(--color-primary-light) 0%, transparent 70%);
+  opacity: 0.45;
+  animation: float 20s ease-in-out infinite;
+}
+
+.hero__bg-grid {
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(var(--color-border-light) 1px, transparent 1px),
+    linear-gradient(90deg, var(--color-border-light) 1px, transparent 1px);
+  background-size: 64px 64px;
+  opacity: 0.35;
+  mask-image: radial-gradient(ellipse at center, black 40%, transparent 80%);
+  -webkit-mask-image: radial-gradient(ellipse at center, black 40%, transparent 80%);
+}
+
+@keyframes float {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  50% { transform: translate(-30px, 30px) scale(1.05); }
+}
+
+.hero__container {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-80);
+  align-items: center;
+}
+
+.hero__badge {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-8);
+  padding: var(--space-8) var(--space-16);
+  background: var(--color-primary-light);
+  color: var(--color-primary-dark);
+  font-size: 0.875rem;
+  font-weight: 500;
+  border-radius: var(--radius-full);
+  margin-bottom: var(--space-24);
+}
+
+.hero__badge-dot {
+  width: 6px;
+  height: 6px;
+  background: var(--color-warm);
+  border-radius: 50%;
+  animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.5; transform: scale(1.2); }
+}
+
+.hero__title {
+  font-size: 3.5rem;
+  font-weight: 700;
+  line-height: 1.1;
+  margin-bottom: var(--space-24);
+  color: var(--color-text-primary);
+}
+
+.hero__title em {
+  font-style: normal;
+  color: var(--color-primary-dark);
+  position: relative;
+  display: inline-block;
+}
+
+.hero__title em::after {
+  content: '';
+  position: absolute;
+  bottom: 4px;
+  left: 0;
+  right: 0;
+  height: 8px;
+  background: var(--color-primary-light);
+  z-index: -1;
+  border-radius: 2px;
+}
+
+.hero__subtitle {
+  font-size: 1.125rem;
+  color: var(--color-text-secondary);
+  margin-bottom: var(--space-32);
+  line-height: 1.7;
+}
+
+.hero__actions {
+  display: flex;
+  gap: var(--space-16);
+  margin-bottom: var(--space-48);
+}
+
+.hero__stats {
+  display: flex;
+  gap: var(--space-48);
+}
+
+.hero__stat {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.hero__stat-value {
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--color-primary-dark);
+  line-height: 1;
+}
+
+.hero__stat-label {
+  font-size: 0.875rem;
+  color: var(--color-text-tertiary);
+}
+
+/* Chat Demo */
+.hero__visual {
+  position: relative;
+}
+
+.chat-demo {
+  background: var(--color-bg);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-xl);
+  overflow: hidden;
+  transform: perspective(1000px) rotateY(-5deg) rotateX(2deg);
+  transition: transform var(--duration-slow) var(--ease-out);
+  border: 1px solid var(--color-border-light);
+}
+
+.chat-demo:hover {
+  transform: perspective(1000px) rotateY(0deg) rotateX(0deg);
+}
+
+.chat-demo__header {
+  display: flex;
+  align-items: center;
+  gap: var(--space-12);
+  padding: var(--space-20);
+  background: var(--color-primary-light);
+  border-bottom: 1px solid var(--color-border-light);
+}
+
+.chat-demo__avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  overflow: hidden;
+  background: var(--color-bg);
+}
+
+.chat-demo__avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.chat-demo__info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.chat-demo__name {
+  font-weight: 600;
+  font-size: 0.9375rem;
+  color: var(--color-text-primary);
+}
+
+.chat-demo__status {
+  font-size: 0.75rem;
+  color: var(--color-primary-dark);
+}
+
+.chat-demo__messages {
+  padding: var(--space-20);
+  height: 320px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-16);
+  scroll-behavior: smooth;
+}
+
+.chat-demo__messages::-webkit-scrollbar {
+  width: 4px;
+}
+
+.chat-demo__messages::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.chat-demo__messages::-webkit-scrollbar-thumb {
+  background: var(--color-border);
+  border-radius: 2px;
+}
+
+.chat-message {
+  display: flex;
+  animation: slideIn var(--duration-normal) var(--ease-out);
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.chat-message--ai {
+  justify-content: flex-start;
+}
+
+.chat-message--user {
+  justify-content: flex-end;
+}
+
+.chat-message__content {
+  max-width: 80%;
+  padding: var(--space-12) var(--space-16);
+  border-radius: var(--radius-lg);
+  font-size: 0.9375rem;
+  line-height: 1.5;
+}
+
+.chat-message--ai .chat-message__content {
+  background: var(--color-primary-light);
+  color: var(--color-text-primary);
+  border-bottom-left-radius: var(--radius-sm);
+}
+
+.chat-message--user .chat-message__content {
+  background: var(--color-primary);
+  color: #fff;
+  border-bottom-right-radius: var(--radius-sm);
+}
+
+.chat-message--typing .chat-message__content {
+  display: flex;
+  gap: 4px;
+  padding: var(--space-16);
+}
+
+.typing-dot {
+  width: 8px;
+  height: 8px;
+  background: var(--color-primary);
+  border-radius: 50%;
+  animation: typing 1.4s ease-in-out infinite;
+}
+
+.typing-dot:nth-child(2) { animation-delay: 0.2s; }
+.typing-dot:nth-child(3) { animation-delay: 0.4s; }
+
+@keyframes typing {
+  0%, 60%, 100% { transform: translateY(0); opacity: 0.4; }
+  30% { transform: translateY(-8px); opacity: 1; }
+}
+
+.chat-demo__input {
+  display: flex;
+  gap: var(--space-12);
+  padding: var(--space-16) var(--space-20);
+  border-top: 1px solid var(--color-border-light);
+  background: var(--color-bg-soft);
+}
+
+.chat-demo__input input {
+  flex: 1;
+  padding: var(--space-12) var(--space-16);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  font-family: inherit;
+  font-size: 0.9375rem;
+  background: var(--color-bg);
+  color: var(--color-text-primary);
+}
+
+.chat-demo__input input::placeholder {
+  color: var(--color-text-tertiary);
+}
+
+.chat-demo__input input:focus {
+  outline: none;
+  border-color: var(--color-primary);
+}
+
+.chat-demo__send {
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-primary);
+  color: #fff;
+  border-radius: var(--radius-md);
+  transition: all var(--duration-fast) var(--ease-out);
+}
+
+.chat-demo__send:hover {
+  background: var(--color-primary-dark);
+  transform: scale(1.05);
+}
+
+/* Floating elements */
+.hero__floating {
+  position: absolute;
+  animation: float-card 6s ease-in-out infinite;
+}
+
+.hero__floating--1 {
+  top: 10%;
+  right: -5%;
+  animation-delay: 0s;
+}
+
+.hero__floating--2 {
+  bottom: 30%;
+  right: 10%;
+  animation-delay: 2s;
+}
+
+.hero__floating--3 {
+  bottom: 10%;
+  right: -3%;
+  animation-delay: 4s;
+}
+
+@keyframes float-card {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-12px); }
+}
+
+.floating-card {
+  display: flex;
+  align-items: center;
+  gap: var(--space-8);
+  padding: var(--space-12) var(--space-16);
+  background: var(--color-bg);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-md);
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--color-text-primary);
+  border: 1px solid var(--color-border-light);
+}
+
+.floating-card svg {
+  width: 20px;
+  height: 20px;
+}
+
+/* 三张浮动卡片：主青 / 深蓝 / 暖橙 分层 */
+.floating-card--primary {
+  border-left: 3px solid var(--color-primary);
+}
+
+.floating-card--primary svg {
+  color: var(--color-primary);
+}
+
+.floating-card--accent {
+  border-left: 3px solid var(--color-cta);
+}
+
+.floating-card--accent svg {
+  color: var(--color-cta);
+}
+
+.floating-card--teal {
+  border-left: 3px solid var(--color-warm);
+}
+
+.floating-card--teal svg {
+  color: var(--color-warm);
+}
+
+/* ============================================
+   Section
+   ============================================ */
+
+.section {
+  padding: var(--space-120) 0;
+}
+
+.section__header {
+  text-align: center;
+  max-width: 720px;
+  margin: 0 auto var(--space-64);
+}
+
+.section__title {
+  font-size: 2.5rem;
+  margin-bottom: var(--space-16);
+  color: var(--color-text-primary);
+}
+
+.section__subtitle {
+  font-size: 1.125rem;
+  color: var(--color-text-secondary);
+}
+
+/* ============================================
+   AI Intro Section
+   ============================================ */
+
+.section--ai-intro {
+  background: var(--color-bg-soft);
+}
+
+.ai-intro__content {
+  display: grid;
+  gap: var(--space-48);
+}
+
+.ai-intro__card {
+  max-width: 800px;
+  margin: 0 auto;
+  width: 100%;
+  background: var(--color-bg);
+  border-radius: var(--radius-xl);
+  border: 1px solid var(--color-border-light);
+  overflow: hidden;
+  transition: all var(--duration-normal) var(--ease-out);
+}
+
+.ai-intro__card:hover {
+  box-shadow: var(--shadow-lg);
+  transform: translateY(-2px);
+}
+
+.ai-intro__card-header {
+  display: flex;
+  align-items: center;
+  gap: var(--space-12);
+  padding: var(--space-20) var(--space-24);
+  background: var(--color-primary-light);
+  border-bottom: 1px solid var(--color-border-light);
+  font-weight: 600;
+  color: var(--color-primary-dark);
+}
+
+.ai-intro__card-header svg {
+  width: 20px;
+  height: 20px;
+}
+
+.ai-intro__card-body {
+  padding: var(--space-32);
+}
+
+.ai-intro__prompt {
+  font-size: 1.0625rem;
+  color: var(--color-text-primary);
+  margin-bottom: var(--space-20);
+  line-height: 1.6;
+}
+
+.ai-intro__code {
+  display: flex;
+  align-items: center;
+  gap: var(--space-12);
+  padding: var(--space-16);
+  background: var(--color-bg-soft);
+  border: 1px solid var(--color-border-light);
+  border-radius: var(--radius-md);
+  font-family: 'Monaco', 'Menlo', 'Consolas', monospace;
+  font-size: 0.875rem;
+}
+
+.ai-intro__code code {
+  flex: 1;
+  color: var(--color-primary-dark);
+  word-break: break-all;
+}
+
+.ai-intro__copy {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  color: var(--color-text-tertiary);
+  border-radius: var(--radius-sm);
+  transition: all var(--duration-fast) var(--ease-out);
+}
+
+.ai-intro__copy:hover {
+  background: var(--color-primary-light);
+  color: var(--color-primary-dark);
+}
+
+.ai-intro__card-footer {
+  display: flex;
+  gap: var(--space-12);
+  padding: var(--space-20) var(--space-24);
+  background: var(--color-bg);
+  border-top: 1px solid var(--color-border-light);
+}
+
+.ai-intro__features {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--space-32);
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+.ai-feature {
+  text-align: center;
+  padding: var(--space-32);
+  background: var(--color-bg);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--color-border-light);
+  transition: all var(--duration-normal) var(--ease-out);
+}
+
+.ai-feature:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-md);
+  border-color: var(--color-primary-light);
+}
+
+.ai-feature__icon {
+  width: 48px;
+  height: 48px;
+  margin: 0 auto var(--space-20);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-primary-light);
+  border-radius: var(--radius-md);
+  color: var(--color-primary-dark);
+}
+
+.ai-feature__icon svg {
+  width: 24px;
+  height: 24px;
+}
+
+.ai-feature h3 {
+  font-size: 1.125rem;
+  margin-bottom: var(--space-12);
+  color: var(--color-text-primary);
+}
+
+.ai-feature p {
+  font-size: 0.9375rem;
+  color: var(--color-text-secondary);
+  line-height: 1.6;
+}
+
+/* ============================================
+   Section 2: 提分闭环 (Loop)
+   ============================================ */
+
+.section--loop {
+  background: var(--color-bg);
+}
+
+.loop-steps {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--space-32);
+}
+
+.loop-step {
+  position: relative;
+  padding: var(--space-32);
+  background: var(--color-bg-soft);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--color-border-light);
+  transition: all var(--duration-normal) var(--ease-out);
+}
+
+.loop-step:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-md);
+  border-color: var(--color-primary-light);
+  background: var(--color-bg);
+}
+
+.loop-step__number {
+  position: absolute;
+  top: var(--space-24);
+  right: var(--space-24);
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--color-primary-light);
+  line-height: 1;
+  user-select: none;
+}
+
+.loop-step__icon {
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-primary-light);
+  border-radius: var(--radius-md);
+  color: var(--color-primary-dark);
+  margin-bottom: var(--space-20);
+}
+
+.loop-step__icon svg {
+  width: 24px;
+  height: 24px;
+}
+
+.loop-step h3 {
+  font-size: 1.25rem;
+  margin-bottom: var(--space-12);
+  color: var(--color-text-primary);
+}
+
+.loop-step p {
+  font-size: 0.9375rem;
+  color: var(--color-text-secondary);
+  line-height: 1.7;
+  margin-bottom: var(--space-20);
+}
+
+.loop-step__tags {
+  display: flex;
+  gap: var(--space-8);
+  flex-wrap: wrap;
+}
+
+.tag {
+  display: inline-flex;
+  align-items: center;
+  padding: var(--space-4) var(--space-12);
+  background: var(--color-primary-light);
+  color: var(--color-primary-dark);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  border-radius: var(--radius-full);
+}
+
+/* ============================================
+   Section 3: Agents
+   ============================================ */
+
+.section--agents {
+  background: var(--color-bg-soft);
+}
+
+.agents-modes {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--space-24);
+  margin-bottom: var(--space-48);
+  max-width: 1000px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.agents-mode {
+  padding: var(--space-24);
+  background: var(--color-bg);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--color-border-light);
+  text-align: center;
+}
+
+.agents-mode__badge {
+  display: inline-block;
+  padding: var(--space-4) var(--space-16);
+  background: var(--color-cta);
+  color: #fff;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  border-radius: var(--radius-full);
+  margin-bottom: var(--space-12);
+  letter-spacing: 0.5px;
+}
+
+.agents-mode p {
+  font-size: 0.9375rem;
+  color: var(--color-text-secondary);
+  line-height: 1.6;
+}
+
+.agents-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--space-20);
+}
+
+.agent-card {
+  position: relative;
+  padding: var(--space-24);
+  background: var(--color-bg);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--color-border-light);
+  transition: all var(--duration-normal) var(--ease-out);
+  text-align: center;
+  cursor: pointer;
+  user-select: none;
+}
+
+.agent-card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-md);
+  border-color: var(--color-primary);
+}
+
+/* 选中态：主色边框 + 渐变背景 + 实心图标 */
+.agent-card.is-active {
+  border-color: var(--color-primary);
+  background: linear-gradient(135deg, var(--color-bg) 0%, var(--color-primary-light) 100%);
+  box-shadow: var(--shadow-md);
+  transform: translateY(-4px);
+}
+
+.agent-card__icon {
+  width: 44px;
+  height: 44px;
+  margin: 0 auto var(--space-16);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-primary-light);
+  border-radius: var(--radius-md);
+  color: var(--color-primary-dark);
+  transition: all var(--duration-normal) var(--ease-out);
+}
+
+.agent-card.is-active .agent-card__icon {
+  background: var(--color-primary);
+  color: #fff;
+}
+
+.agent-card__icon svg {
+  width: 22px;
+  height: 22px;
+}
+
+.agent-card h4 {
+  font-size: 1rem;
+  margin-bottom: var(--space-8);
+  color: var(--color-text-primary);
+}
+
+.agent-card p {
+  font-size: 0.875rem;
+  color: var(--color-text-secondary);
+  line-height: 1.5;
+}
+
+.agent-card__tag {
+  position: absolute;
+  top: var(--space-12);
+  right: var(--space-12);
+  padding: 2px var(--space-8);
+  background: var(--color-cta);
+  color: #fff;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  border-radius: var(--radius-full);
+  letter-spacing: 0.3px;
+}
+
+/* ============================================
+   Section 4: Tier 体系
+   ============================================ */
+
+.section--tiers {
+  background: var(--color-bg);
+}
+
+.tiers-track {
+  max-width: 800px;
+  margin: 0 auto var(--space-48);
+}
+
+.tiers-progress {
+  height: 8px;
+  background: var(--color-primary-light);
+  border-radius: var(--radius-full);
+  overflow: hidden;
+  margin-bottom: var(--space-12);
+}
+
+.tiers-progress__fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--color-primary) 0%, var(--color-warm) 100%);
+  border-radius: var(--radius-full);
+  transition: width 1.5s var(--ease-out);
+}
+
+.tiers-labels {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.8125rem;
+  color: var(--color-text-tertiary);
+  font-weight: 500;
+}
+
+.tiers-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: var(--space-20);
+}
+
+.tier-card {
+  position: relative;
+  padding: var(--space-24);
+  background: var(--color-bg-soft);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--color-border-light);
+  transition: all var(--duration-normal) var(--ease-out);
+  cursor: pointer;
+  user-select: none;
+}
+
+.tier-card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-md);
+  border-color: var(--color-primary);
+  background: var(--color-bg);
+}
+
+/* 选中态：主色边框 + 白底 + 阴影 */
+.tier-card.is-active {
+  border-color: var(--color-primary);
+  background: var(--color-bg);
+  box-shadow: var(--shadow-md);
+  transform: translateY(-4px);
+}
+
+.tier-card.is-active::before {
+  content: '当前';
+  position: absolute;
+  top: -10px;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 2px var(--space-12);
+  background: var(--color-warm);
+  color: #fff;
+  font-size: 0.75rem;
+  font-weight: 600;
+  border-radius: var(--radius-full);
+}
+
+.tier-card__level {
+  display: inline-block;
+  padding: var(--space-4) var(--space-12);
+  background: var(--color-primary-light);
+  color: var(--color-primary-dark);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  border-radius: var(--radius-full);
+  margin-bottom: var(--space-12);
+  transition: all var(--duration-normal) var(--ease-out);
+}
+
+.tier-card.is-active .tier-card__level {
+  background: var(--color-primary);
+  color: #fff;
+}
+
+.tier-card h4 {
+  font-size: 1.125rem;
+  margin-bottom: var(--space-4);
+  color: var(--color-text-primary);
+}
+
+.tier-card__range {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--color-primary-dark);
+  margin-bottom: var(--space-12);
+}
+
+.tier-card p {
+  font-size: 0.875rem;
+  color: var(--color-text-secondary);
+  line-height: 1.6;
+  margin-bottom: var(--space-16);
+}
+
+.tier-card ul {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-8);
+}
+
+.tier-card li {
+  font-size: 0.8125rem;
+  color: var(--color-text-secondary);
+  padding-left: var(--space-16);
+  position: relative;
+}
+
+.tier-card li::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 7px;
+  width: 6px;
+  height: 6px;
+  background: var(--color-primary);
+  border-radius: 50%;
+}
+
+/* ============================================
+   Section 5: 题库 (Bank)
+   ============================================ */
+
+.section--bank {
+  background: var(--color-bg-soft);
+}
+
+.bank-stats {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--space-24);
+  margin-bottom: var(--space-48);
+}
+
+.bank-stat {
+  padding: var(--space-32);
+  background: var(--color-bg);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--color-border-light);
+  text-align: center;
+  transition: all var(--duration-normal) var(--ease-out);
+}
+
+.bank-stat:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-md);
+  border-color: var(--color-primary-light);
+}
+
+.bank-stat__value {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: var(--color-primary-dark);
+  line-height: 1;
+  margin-bottom: var(--space-8);
+}
+
+.bank-stat__label {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--color-text-primary);
+  margin-bottom: var(--space-4);
+}
+
+.bank-stat__desc {
+  font-size: 0.8125rem;
+  color: var(--color-text-tertiary);
+}
+
+.bank-subjects {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--space-24);
+}
+
+.bank-subject {
+  padding: var(--space-32);
+  background: var(--color-bg);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--color-border-light);
+  transition: all var(--duration-normal) var(--ease-out);
+}
+
+.bank-subject:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-md);
+  border-color: var(--color-primary);
+}
+
+.bank-subject__icon {
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-primary-light);
+  border-radius: var(--radius-md);
+  color: var(--color-primary-dark);
+  margin-bottom: var(--space-20);
+}
+
+.bank-subject__icon svg {
+  width: 24px;
+  height: 24px;
+}
+
+.bank-subject h4 {
+  font-size: 1.125rem;
+  margin-bottom: var(--space-12);
+  color: var(--color-text-primary);
+}
+
+.bank-subject p {
+  font-size: 0.875rem;
+  color: var(--color-text-secondary);
+  line-height: 1.7;
+}
+
+/* ============================================
+   Section 6: 开源 (Open Source)
+   ============================================ */
+
+.section--opensource {
+  background: var(--color-bg);
+}
+
+.opensource-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--space-24);
+  margin-bottom: var(--space-48);
+}
+
+.opensource-card {
+  padding: var(--space-32);
+  background: var(--color-bg-soft);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--color-border-light);
+  transition: all var(--duration-normal) var(--ease-out);
+}
+
+.opensource-card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-md);
+  border-color: var(--color-primary);
+  background: var(--color-bg);
+}
+
+.opensource-card__icon {
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-cta);
+  border-radius: var(--radius-md);
+  color: #fff;
+  margin-bottom: var(--space-20);
+}
+
+.opensource-card__icon svg {
+  width: 24px;
+  height: 24px;
+}
+
+.opensource-card h4 {
+  font-size: 1.125rem;
+  margin-bottom: var(--space-12);
+  color: var(--color-text-primary);
+}
+
+.opensource-card p {
+  font-size: 0.875rem;
+  color: var(--color-text-secondary);
+  line-height: 1.7;
+}
+
+.opensource-tech {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: var(--space-32);
+  background: var(--color-bg-soft);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--color-border-light);
+  text-align: center;
+}
+
+.opensource-tech__title {
+  font-size: 1rem;
+  margin-bottom: var(--space-20);
+  color: var(--color-text-primary);
+}
+
+.tech-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-12);
+  justify-content: center;
+}
+
+.tech-tag {
+  padding: var(--space-8) var(--space-16);
+  background: var(--color-bg);
+  border: 1px solid var(--color-border);
+  color: var(--color-primary-dark);
+  font-size: 0.875rem;
+  font-weight: 500;
+  border-radius: var(--radius-full);
+  transition: all var(--duration-fast) var(--ease-out);
+}
+
+.tech-tag:hover {
+  border-color: var(--color-primary);
+  background: var(--color-primary-light);
+}
+
+/* ============================================
+   Section 7: CTA
+   ============================================ */
+
+.section--cta {
+  background: var(--color-bg-soft);
+  padding: var(--space-80) 0;
+}
+
+.cta-card {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: var(--space-48);
+  align-items: center;
+  padding: var(--space-64);
+  background: var(--color-cta);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-xl);
+  position: relative;
+  overflow: hidden;
+}
+
+.cta-card::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  right: -20%;
+  width: 60%;
+  height: 200%;
+  background: radial-gradient(circle, rgba(5, 175, 181, 0.2) 0%, transparent 70%);
+  pointer-events: none;
+}
+
+.cta-card__content {
+  position: relative;
+  z-index: 1;
+}
+
+.cta-card__content h2 {
+  font-size: 2.25rem;
+  color: #fff;
+  margin-bottom: var(--space-16);
+}
+
+.cta-card__content p {
+  font-size: 1.0625rem;
+  color: rgba(255, 255, 255, 0.75);
+  margin-bottom: var(--space-32);
+  line-height: 1.7;
+}
+
+.cta-card__actions {
+  display: flex;
+  gap: var(--space-16);
+}
+
+.cta-card__actions .btn--cta {
+  background: var(--color-primary);
+  box-shadow: 0 2px 8px rgba(5, 175, 181, 0.4);
+}
+
+.cta-card__actions .btn--cta:hover {
+  background: var(--color-primary-dark);
+}
+
+.cta-card__actions .btn--ghost {
+  border-color: rgba(255, 255, 255, 0.3);
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.cta-card__actions .btn--ghost:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.5);
+  color: #fff;
+}
+
+.cta-card__visual {
+  position: relative;
+  z-index: 1;
+}
+
+.cta-mini-loop {
+  display: flex;
+  align-items: center;
+  gap: var(--space-16);
+  padding: var(--space-24);
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: var(--radius-lg);
+  backdrop-filter: blur(8px);
+}
+
+.cta-mini-loop__step {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-8);
+  color: rgba(255, 255, 255, 0.6);
+  transition: all var(--duration-normal) var(--ease-out);
+}
+
+.cta-mini-loop__step.is-active {
+  color: var(--color-primary);
+}
+
+.cta-mini-loop__step svg {
+  width: 32px;
+  height: 32px;
+}
+
+.cta-mini-loop__step span {
+  font-size: 0.8125rem;
+  font-weight: 500;
+}
+
+.cta-mini-loop__arrow {
+  color: rgba(255, 255, 255, 0.3);
+  font-size: 1.25rem;
+}
+
+/* ============================================
+   Footer
+   ============================================ */
+
+.footer {
+  background: var(--color-cta);
+  color: rgba(255, 255, 255, 0.85);
+  padding: var(--space-64) 0 var(--space-32);
+}
+
+.footer__grid {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr 1fr;
+  gap: var(--space-48);
+  margin-bottom: var(--space-48);
+}
+
+.footer__logo {
+  display: flex;
+  align-items: center;
+  gap: var(--space-12);
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #fff;
+  margin-bottom: var(--space-16);
+}
+
+.footer__logo svg {
+  color: var(--color-primary);
+}
+
+.footer__slogan {
+  font-size: 0.9375rem;
+  color: rgba(255, 255, 255, 0.6);
+  line-height: 1.7;
+  margin-bottom: var(--space-20);
+}
+
+.footer__badges {
+  display: flex;
+  gap: var(--space-8);
+}
+
+.footer__badge {
+  padding: var(--space-4) var(--space-12);
+  background: rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.75);
+  font-size: 0.75rem;
+  font-weight: 500;
+  border-radius: var(--radius-full);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+.footer__col h5 {
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: #fff;
+  margin-bottom: var(--space-16);
+}
+
+.footer__col a {
+  display: block;
+  font-size: 0.875rem;
+  color: rgba(255, 255, 255, 0.6);
+  padding: var(--space-4) 0;
+  transition: color var(--duration-fast) var(--ease-out);
+}
+
+.footer__col a:hover {
+  color: var(--color-primary);
+}
+
+.footer__bottom {
+  padding-top: var(--space-32);
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.8125rem;
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.footer__copyright {
+  color: rgba(255, 255, 255, 0.4);
+}
+
+/* ============================================
+   Animations
+   ============================================ */
+
+.reveal {
+  opacity: 0;
+  transform: translateY(30px);
+  animation: reveal var(--duration-slow) var(--ease-out) forwards;
+}
+
+@keyframes reveal {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Stagger animations */
+.reveal:nth-child(1) { animation-delay: 0.1s; }
+.reveal:nth-child(2) { animation-delay: 0.2s; }
+.reveal:nth-child(3) { animation-delay: 0.3s; }
+
+/* ============================================
+   Responsive
+   ============================================ */
+
+@media (max-width: 1024px) {
+  .hero__container {
+    gap: var(--space-48);
+  }
+
+  .hero__title {
+    font-size: 2.75rem;
+  }
+
+  .ai-intro__features {
+    grid-template-columns: 1fr;
+    gap: var(--space-24);
+  }
+
+  /* 新 sections 响应式 */
+  .loop-steps {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .agents-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  .tiers-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  .bank-stats,
+  .bank-subjects,
+  .opensource-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .cta-card {
+    grid-template-columns: 1fr;
+    padding: var(--space-48);
+  }
+
+  .cta-card__visual {
+    display: none;
+  }
+
+  .footer__grid {
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-32);
+  }
+}
+
+@media (max-width: 768px) {
+  .nav__links {
+    display: none;
+  }
+
+  .hero {
+    padding: var(--space-80) 0 var(--space-48);
+  }
+
+  .hero__container {
+    grid-template-columns: 1fr;
+    gap: var(--space-48);
+  }
+
+  .hero__title {
+    font-size: 2.25rem;
+  }
+
+  .hero__subtitle {
+    font-size: 1rem;
+  }
+
+  .hero__actions {
+    flex-direction: column;
+  }
+
+  .hero__stats {
+    gap: var(--space-32);
+  }
+
+  .hero__stat-value {
+    font-size: 1.5rem;
+  }
+
+  .hero__floating {
+    display: none;
+  }
+
+  .chat-demo {
+    transform: none;
+  }
+
+  .section {
+    padding: var(--space-64) 0;
+  }
+
+  .section__title {
+    font-size: 2rem;
+  }
+
+  .ai-intro__card-footer {
+    flex-wrap: wrap;
+  }
+
+  /* 新 sections 移动端 */
+  .loop-steps,
+  .agents-grid,
+  .tiers-grid,
+  .bank-stats,
+  .bank-subjects,
+  .opensource-grid,
+  .agents-modes {
+    grid-template-columns: 1fr;
+  }
+
+  .cta-card {
+    padding: var(--space-32);
+  }
+
+  .cta-card__content h2 {
+    font-size: 1.75rem;
+  }
+
+  .cta-card__actions {
+    flex-direction: column;
+  }
+
+  .footer__grid {
+    grid-template-columns: 1fr;
+    gap: var(--space-24);
+  }
+
+  .footer__bottom {
+    flex-direction: column;
+    gap: var(--space-8);
+    text-align: center;
+  }
+}
+
+</style>
+<style>body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif !important; }</style>
+</head>
+<body>
+
+  <!-- Navigation -->
+  <nav class="nav">
+    <div class="container nav__inner">
+      <a href="#" class="nav__logo">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M12 2L2 7l10 5 10-5-10-5z"/>
+          <path d="M2 17l10 5 10-5"/>
+          <path d="M2 12l10 5 10-5"/>
+        </svg>
+        <span>Dr. IELTS</span>
+      </a>
+      <div class="nav__links">
+        <a href="#workflow" class="nav__link">提分闭环</a>
+        <a href="#agents" class="nav__link">Agent</a>
+        <a href="#tiers" class="nav__link">Tier 体系</a>
+        <a href="#bank" class="nav__link">题库</a>
+        <a href="#opensource" class="nav__link">开源</a>
+      </div>
+      <div class="nav__actions">
+        <a href="https://github.com/Richard-LLLL/dr-ielts" class="btn btn--text" target="_blank" rel="noopener">
+          <svg viewBox="0 0 24 24" fill="currentColor" width="18" height="18"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+          GitHub
+        </a>
+        <a href="dashboard.html" class="btn btn--cta">开始体验</a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Hero Section -->
+  <section class="hero">
+    <div class="container hero__container">
+      <div class="hero__content reveal">
+        <div class="hero__badge">
+          <span class="hero__badge-dot"></span>
+          开源项目 · 数据驱动的 AI 雅思学习
+        </div>
+        <h1 class="hero__title">
+          你的 AI 雅思教练<br>
+          <em>诊断 → 训练 → 反馈 → 再诊断</em>
+        </h1>
+        <p class="hero__subtitle">
+          12 个业务 Agent 协同工作，覆盖 4.5–8.0 全分段。<br>
+          不是刷题工具，而是数据驱动的提分闭环。
+        </p>
+        <div class="hero__actions">
+          <a href="dashboard.html" class="btn btn--cta btn--large magnetic" data-magnetic>
+            开始体验
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+          </a>
+          <a href="https://github.com/Richard-LLLL/dr-ielts" class="btn btn--ghost btn--large" target="_blank" rel="noopener">
+            <svg viewBox="0 0 24 24" fill="currentColor" width="18" height="18"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+            查看源码
+          </a>
+        </div>
+        <div class="hero__stats">
+          <div class="hero__stat">
+            <span class="hero__stat-value">12</span>
+            <span class="hero__stat-label">业务 Agent</span>
+          </div>
+          <div class="hero__stat">
+            <span class="hero__stat-value">624</span>
+            <span class="hero__stat-label">真题覆盖</span>
+          </div>
+          <div class="hero__stat">
+            <span class="hero__stat-value">5</span>
+            <span class="hero__stat-label">Tier 训练体系</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="hero__visual reveal">
+        <div class="chat-demo">
+          <div class="chat-demo__header">
+            <div class="chat-demo__avatar">
+              <img src="data:image/png;base64,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" alt="Dr. IELTS">
+            </div>
+            <div class="chat-demo__info">
+              <span class="chat-demo__name">Dr. IELTS</span>
+              <span class="chat-demo__status">AI 教练 · 在线</span>
+            </div>
+          </div>
+          <div class="chat-demo__messages" id="chatMessages">
+            <div class="chat-message chat-message--ai">
+              <div class="chat-message__content">
+                <p>你好！我是 Dr. IELTS。我看到你最近的写作练习中，Task Response 维度得分较低。</p>
+              </div>
+            </div>
+            <div class="chat-message chat-message--ai">
+              <div class="chat-message__content">
+                <p>建议你先完成一篇 Task 2 议论文，我会从 4 个维度为你评分，并给出具体的改进建议。</p>
+              </div>
+            </div>
+            <div class="chat-message chat-message--user">
+              <div class="chat-message__content">
+                <p>好的，我现在开始写</p>
+              </div>
+            </div>
+            <div class="chat-message chat-message--ai chat-message--typing">
+              <div class="chat-message__content">
+                <span class="typing-dot"></span>
+                <span class="typing-dot"></span>
+                <span class="typing-dot"></span>
+              </div>
+            </div>
+          </div>
+          <div class="chat-demo__input">
+            <input type="text" placeholder="输入你的问题..." disabled>
+            <button class="chat-demo__send" disabled>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/></svg>
+            </button>
+          </div>
+        </div>
+
+        <!-- Floating elements for visual interest -->
+        <div class="hero__floating hero__floating--1">
+          <div class="floating-card floating-card--accent">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4"/></svg>
+            <span>4 维度评分</span>
+          </div>
+        </div>
+        <div class="hero__floating hero__floating--2">
+          <div class="floating-card floating-card--primary">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+            <span>多 Agent 协作</span>
+          </div>
+        </div>
+        <div class="hero__floating hero__floating--3">
+          <div class="floating-card floating-card--teal">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+            <span>实时反馈</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Background decoration -->
+    <div class="hero__bg">
+      <div class="hero__bg-gradient"></div>
+      <div class="hero__bg-grid"></div>
+    </div>
+  </section>
+
+  <!-- Section 1: AI Introduction -->
+  <section class="section section--ai-intro">
+    <div class="container">
+      <div class="section__header reveal">
+        <h2 class="section__title">让 AI 为你介绍 Dr. IELTS</h2>
+        <p class="section__subtitle">阅读 README，了解为什么这不只是又一个刷题工具</p>
+      </div>
+
+      <div class="ai-intro__content reveal">
+        <div class="ai-intro__card">
+          <div class="ai-intro__card-header">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+            <span>发送指令给 AI</span>
+          </div>
+          <div class="ai-intro__card-body">
+            <p class="ai-intro__prompt">
+              "阅读这个 README，并告诉我它为什么不只是又一个 AI 雅思刷题工具："
+            </p>
+            <div class="ai-intro__code">
+              <code>https://github.com/Richard-LLLL/dr-ielts/blob/main/README.md</code>
+              <button class="ai-intro__copy" aria-label="复制链接">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+              </button>
+            </div>
+          </div>
+          <div class="ai-intro__card-footer">
+            <a href="https://chat.openai.com/?prompt=阅读这个 README，并告诉我它为什么不只是又一个 AI 雅思刷题工具：https://github.com/Richard-LLLL/dr-ielts/blob/main/README.md" class="btn btn--ghost btn--small" target="_blank" rel="noopener">
+              <svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/></svg>
+              ChatGPT
+            </a>
+            <a href="https://gemini.google.com/?prompt=阅读这个 README，并告诉我它为什么不只是又一个 AI 雅思刷题工具：https://github.com/Richard-LLLL/dr-ielts/blob/main/README.md" class="btn btn--ghost btn--small" target="_blank" rel="noopener">
+              <svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>
+              Gemini
+            </a>
+            <a href="https://claude.ai/?prompt=阅读这个 README，并告诉我它为什么不只是又一个 AI 雅思刷题工具：https://github.com/Richard-LLLL/dr-ielts/blob/main/README.md" class="btn btn--ghost btn--small" target="_blank" rel="noopener">
+              <svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/></svg>
+              Claude
+            </a>
+          </div>
+        </div>
+
+        <div class="ai-intro__features">
+          <div class="ai-feature">
+            <div class="ai-feature__icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></svg>
+            </div>
+            <h3>多 Agent 协作</h3>
+            <p>12 个业务 Agent 各司其职，从诊断到反馈形成完整闭环</p>
+          </div>
+          <div class="ai-feature">
+            <div class="ai-feature__icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 3h5a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-5a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+            </div>
+            <h3>全真题库</h3>
+            <p>剑雅 9-21 全量覆盖，624 题包含听力、阅读、写作、口语</p>
+          </div>
+          <div class="ai-feature">
+            <div class="ai-feature__icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+            </div>
+            <h3>数据驱动</h3>
+            <p>结构化 + 语义双层记忆，错误归因追踪，不重复犯错</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Section 2: 提分闭环全链路 -->
+  <section class="section section--loop" id="workflow">
+    <div class="container">
+      <div class="section__header reveal">
+        <h2 class="section__title">提分闭环全链路</h2>
+        <p class="section__subtitle">诊断 → 计划 → 训练 → 反馈 → 记忆 → 再诊断，每一步都由 Agent 驱动，数据全程可追踪</p>
+      </div>
+
+      <div class="loop-steps">
+        <div class="loop-step reveal">
+          <div class="loop-step__number">01</div>
+          <div class="loop-step__icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>
+          </div>
+          <h3>诊断定级</h3>
+          <p>轻量诊断：10 道听力 + 13 道阅读 + 1 篇写作 + 3 道口述。Diagnostic Agent 评估四科能力，自动匹配 Tier 等级。</p>
+          <div class="loop-step__tags">
+            <span class="tag">轻量诊断</span>
+            <span class="tag">Tier 定级</span>
+          </div>
+        </div>
+
+        <div class="loop-step reveal">
+          <div class="loop-step__number">02</div>
+          <div class="loop-step__icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+          </div>
+          <h3>计划生成</h3>
+          <p>Coach Agent 根据你的目标分数、剩余天数和每日可投入时间，生成个性化训练计划，避开休息时段。</p>
+          <div class="loop-step__tags">
+            <span class="tag">个性化计划</span>
+            <span class="tag">智能排期</span>
+          </div>
+        </div>
+
+        <div class="loop-step reveal">
+          <div class="loop-step__number">03</div>
+          <div class="loop-step__icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 3h5a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-5a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+          </div>
+          <h3>训练执行</h3>
+          <p>剑雅 9-21 全真题库，听力 / 阅读 / 写作 / 口语四科覆盖。支持单点练习与全真模考两种模式。</p>
+          <div class="loop-step__tags">
+            <span class="tag">624 真题</span>
+            <span class="tag">全真模考</span>
+          </div>
+        </div>
+
+        <div class="loop-step reveal">
+          <div class="loop-step__number">04</div>
+          <div class="loop-step__icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+          </div>
+          <h3>精准反馈</h3>
+          <p>写作按 TR / CC / LR / GRA 四维评分，口语按流利度 / 词汇 / 语法 / 发音评估。每题错误归因，不只给对错。</p>
+          <div class="loop-step__tags">
+            <span class="tag">4 维评分</span>
+            <span class="tag">错误归因</span>
+          </div>
+        </div>
+
+        <div class="loop-step reveal">
+          <div class="loop-step__number">05</div>
+          <div class="loop-step__icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+          </div>
+          <h3>记忆沉淀</h3>
+          <p>结构化（SQLite）+ 语义（Mem0）双层记忆。Memory Agent 记录表达习惯与语法模式，错误不重复犯。</p>
+          <div class="loop-step__tags">
+            <span class="tag">双层记忆</span>
+            <span class="tag">长期画像</span>
+          </div>
+        </div>
+
+        <div class="loop-step reveal">
+          <div class="loop-step__number">06</div>
+          <div class="loop-step__icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 4v6h-6"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+          </div>
+          <h3>再诊断</h3>
+          <p>定期重新诊断，对比能力雷达图变化。系统动态调整 Tier 等级与训练重点，形成完整提分闭环。</p>
+          <div class="loop-step__tags">
+            <span class="tag">动态调整</span>
+            <span class="tag">闭环追踪</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Section 3: 12 个业务 Agent -->
+  <section class="section section--agents" id="agents">
+    <div class="container">
+      <div class="section__header reveal">
+        <h2 class="section__title">12+ Agent，各司其职</h2>
+        <p class="section__subtitle">三种协作模式：Supervisor 总控调度、Pipeline 流水线执行、Consultation 跨 Agent 咨询</p>
+      </div>
+
+      <div class="agents-modes reveal">
+        <div class="agents-mode">
+          <div class="agents-mode__badge">Supervisor</div>
+          <p>Orchestrator Agent 作为总控，识别意图并路由到对应专家 Agent</p>
+        </div>
+        <div class="agents-mode">
+          <div class="agents-mode__badge">Pipeline</div>
+          <p>评分流水线：输入 → 评分 → 反模板 → 归因 → 记忆，串行执行</p>
+        </div>
+        <div class="agents-mode">
+          <div class="agents-mode__badge">Consultation</div>
+          <p>Agent 间互相咨询：Content Agent 向 Memory Agent 查询用户画像</p>
+        </div>
+      </div>
+
+      <div class="agents-grid">
+        <div class="agent-card reveal" data-agent="Orchestrator">
+          <div class="agent-card__icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83"/></svg>
+          </div>
+          <h4>Orchestrator</h4>
+          <p>总控调度，意图识别与路由</p>
+          <span class="agent-card__tag">Supervisor</span>
+        </div>
+        <div class="agent-card reveal">
+          <div class="agent-card__icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+          </div>
+          <h4>Coach</h4>
+          <p>教练，生成计划与任务跟踪</p>
+        </div>
+        <div class="agent-card reveal">
+          <div class="agent-card__icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>
+          </div>
+          <h4>Diagnostic</h4>
+          <p>诊断，冷启动能力评估</p>
+        </div>
+        <div class="agent-card reveal">
+          <div class="agent-card__icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+          </div>
+          <h4>Feedback</h4>
+          <p>反馈，错误归因与改进建议</p>
+        </div>
+        <div class="agent-card reveal">
+          <div class="agent-card__icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+          </div>
+          <h4>Content</h4>
+          <p>内容，学习材料智能推荐</p>
+        </div>
+        <div class="agent-card reveal">
+          <div class="agent-card__icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></svg>
+          </div>
+          <h4>Memory</h4>
+          <p>记忆，长期画像与特征查询</p>
+        </div>
+        <div class="agent-card reveal">
+          <div class="agent-card__icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+          </div>
+          <h4>Quality</h4>
+          <p>质量，评分一致性检查</p>
+        </div>
+        <div class="agent-card reveal">
+          <div class="agent-card__icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M15 9l-6 6M9 9l6 6"/></svg>
+          </div>
+          <h4>AntiTemplate</h4>
+          <p>反模板，检测套版表达</p>
+        </div>
+        <div class="agent-card reveal">
+          <div class="agent-card__icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+          </div>
+          <h4>PersonalizedMemory</h4>
+          <p>个性化记忆，专属学习画像</p>
+        </div>
+        <div class="agent-card reveal">
+          <div class="agent-card__icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></svg>
+          </div>
+          <h4>Writing</h4>
+          <p>写作专用，TR/CC/LR/GRA 四维</p>
+        </div>
+        <div class="agent-card reveal">
+          <div class="agent-card__icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="2" width="6" height="11" rx="3"/><path d="M5 10v2a7 7 0 0 0 14 0v-2"/><path d="M12 19v3"/></svg>
+          </div>
+          <h4>Speaking</h4>
+          <p>口语专用，流利度与发音评估</p>
+        </div>
+        <div class="agent-card reveal">
+          <div class="agent-card__icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 14v3a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2z"/><path d="M17 14v3a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2h-1a2 2 0 0 0-2 2z"/><path d="M6 15a7 7 0 0 1 12 0"/></svg>
+          </div>
+          <h4>Listening + Reading</h4>
+          <p>客观题专用，策略分析与归因</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Section 4: 5 级 Tier 训练体系 -->
+  <section class="section section--tiers" id="tiers">
+    <div class="container">
+      <div class="section__header reveal">
+        <h2 class="section__title">5 级 Tier 训练体系</h2>
+        <p class="section__subtitle">覆盖 4.5-8.0 全分段，不同分数段匹配不同的训练方法、强度与节奏</p>
+      </div>
+
+      <div class="tiers-track reveal">
+        <div class="tiers-progress">
+          <div class="tiers-progress__fill" data-progress="0" style="width: 0%"></div>
+        </div>
+        <div class="tiers-labels">
+          <span>4.5</span><span>5.0</span><span>5.5</span><span>6.0</span><span>7.0</span><span>8.0</span>
+        </div>
+      </div>
+
+      <div class="tiers-grid">
+        <div class="tier-card reveal" data-tier="1" data-progress="0">
+          <div class="tier-card__level">Tier 1</div>
+          <h4>基础重建</h4>
+          <div class="tier-card__range">4.5 - 5.0</div>
+          <p>词汇语法打底，句子级输出为主。重点解决"写不出、说不出"的问题。</p>
+          <ul>
+            <li>高频场景词汇</li>
+            <li>基础句型仿写</li>
+            <li>短段落输出</li>
+          </ul>
+        </div>
+        <div class="tier-card reveal" data-tier="2" data-progress="20">
+          <div class="tier-card__level">Tier 2</div>
+          <h4>方法入门</h4>
+          <div class="tier-card__range">5.0 - 5.5</div>
+          <p>掌握各科技巧框架，建立答题方法论。重点解决"没方法、凭感觉"的问题。</p>
+          <ul>
+            <li>听力定位技巧</li>
+            <li>阅读题型方法</li>
+            <li>写作结构框架</li>
+          </ul>
+        </div>
+        <div class="tier-card reveal" data-tier="3" data-progress="40">
+          <div class="tier-card__level">Tier 3</div>
+          <h4>瓶颈突破</h4>
+          <div class="tier-card__range">5.5 - 6.0</div>
+          <p>针对弱项重点突破，反模板训练开启。重点解决"卡分、套路化"的问题。</p>
+          <ul>
+            <li>弱项定向训练</li>
+            <li>反模板检测</li>
+            <li>同义替换积累</li>
+          </ul>
+        </div>
+        <div class="tier-card reveal" data-tier="4" data-progress="70">
+          <div class="tier-card__level">Tier 4</div>
+          <h4>精进打磨</h4>
+          <div class="tier-card__range">6.0 - 7.0</div>
+          <p>精细化表达打磨，追求语言质量。重点解决"准确但不地道"的问题。</p>
+          <ul>
+            <li>地道表达替换</li>
+            <li>发音细节纠正</li>
+            <li>高分范文对比</li>
+          </ul>
+        </div>
+        <div class="tier-card reveal" data-tier="5" data-progress="100">
+          <div class="tier-card__level">Tier 5</div>
+          <h4>冲刺高分</h4>
+          <div class="tier-card__range">7.0 - 8.0</div>
+          <p>全真模考节奏，冲刺目标分数。重点解决"稳定性与考场发挥"的问题。</p>
+          <ul>
+            <li>全真限时模考</li>
+            <li>考前状态调整</li>
+            <li>高频错题回炉</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Section 5: 全真题库 -->
+  <section class="section section--bank" id="bank">
+    <div class="container">
+      <div class="section__header reveal">
+        <h2 class="section__title">剑雅 9-21 全真题库</h2>
+        <p class="section__subtitle">13 本书 × 4 Tests，624 题全量覆盖，每题都经过结构化处理与富文本渲染</p>
+      </div>
+
+      <div class="bank-stats reveal">
+        <div class="bank-stat">
+          <div class="bank-stat__value">13</div>
+          <div class="bank-stat__label">剑桥雅思真题</div>
+          <div class="bank-stat__desc">剑雅 9 到剑雅 21</div>
+        </div>
+        <div class="bank-stat">
+          <div class="bank-stat__value">52</div>
+          <div class="bank-stat__label">完整 Tests</div>
+          <div class="bank-stat__desc">每本书 4 套完整试题</div>
+        </div>
+        <div class="bank-stat">
+          <div class="bank-stat__value">624</div>
+          <div class="bank-stat__label">题目总数</div>
+          <div class="bank-stat__desc">听 / 读 / 写 / 说全覆盖</div>
+        </div>
+        <div class="bank-stat">
+          <div class="bank-stat__value">100%</div>
+          <div class="bank-stat__label">富文本渲染</div>
+          <div class="bank-stat__desc">表格 / 图表 / 流程图完整还原</div>
+        </div>
+      </div>
+
+      <div class="bank-subjects reveal">
+        <div class="bank-subject">
+          <div class="bank-subject__icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 14v3a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2z"/><path d="M17 14v3a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2h-1a2 2 0 0 0-2 2z"/><path d="M6 15a7 7 0 0 1 12 0"/></svg>
+          </div>
+          <h4>听力</h4>
+          <p>Part 1-4 全题型，含表格填空、选择、匹配、地图题，音频还原真实考场语速</p>
+        </div>
+        <div class="bank-subject">
+          <div class="bank-subject__icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 3h5a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-5a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+          </div>
+          <h4>阅读</h4>
+          <p>Passage 1-3 学术文章，判断 / 选择 / 配对 / 填空全题型，段落定位精准还原</p>
+        </div>
+        <div class="bank-subject">
+          <div class="bank-subject__icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></svg>
+          </div>
+          <h4>写作</h4>
+          <p>Task 1 图表 + Task 2 议论文，图表高清渲染，支持 AI 四维度即时批改</p>
+        </div>
+        <div class="bank-subject">
+          <div class="bank-subject__icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="2" width="6" height="11" rx="3"/><path d="M5 10v2a7 7 0 0 0 14 0v-2"/><path d="M12 19v3"/></svg>
+          </div>
+          <h4>口语</h4>
+          <p>Part 1 / 2 / 3 全话题，录音提交后 AI 评估流利度、词汇、语法与发音</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Section 6: 开源 -->
+  <section class="section section--opensource" id="opensource">
+    <div class="container">
+      <div class="section__header reveal">
+        <h2 class="section__title">完全开源，自由定制</h2>
+        <p class="section__subtitle">代码完全开放，可自部署、可二次开发，训练方案与 Prompt 都由你掌控</p>
+      </div>
+
+      <div class="opensource-grid">
+        <div class="opensource-card reveal">
+          <div class="opensource-card__icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 18l6-6-6-6M8 6l-6 6 6 6"/></svg>
+          </div>
+          <h4>代码完全开源</h4>
+          <p>前后端完整代码开源，包括 12 个 Agent 的实现细节、LangGraph 工作流编排与评分器逻辑</p>
+        </div>
+        <div class="opensource-card reveal">
+          <div class="opensource-card__icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>
+          </div>
+          <h4>支持私有化部署</h4>
+          <p>Local First，数据存储在本地 SQLite，学习记录与记忆数据完全由你自己掌控</p>
+        </div>
+        <div class="opensource-card reveal">
+          <div class="opensource-card__icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+          </div>
+          <h4>多 LLM 自由切换</h4>
+          <p>OpenAI / Azure / Gemini / Ollama 本地模型，支持自定义 API 密钥，成本自己控制</p>
+        </div>
+        <div class="opensource-card reveal">
+          <div class="opensource-card__icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
+          </div>
+          <h4>可扩展插件架构</h4>
+          <p>ExamPlugin 基类 + PluginRegistry，可按需扩展四六级、托福等其他考试系统</p>
+        </div>
+      </div>
+
+      <div class="opensource-tech reveal">
+        <h4 class="opensource-tech__title">技术栈</h4>
+        <div class="tech-tags">
+          <span class="tech-tag">Python 3.10+</span>
+          <span class="tech-tag">FastAPI</span>
+          <span class="tech-tag">LangGraph</span>
+          <span class="tech-tag">Pydantic v2</span>
+          <span class="tech-tag">SQLite</span>
+          <span class="tech-tag">Mem0</span>
+          <span class="tech-tag">原生 ES Modules</span>
+          <span class="tech-tag">SSE 流式响应</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Section 7: CTA -->
+  <section class="section section--cta">
+    <div class="container">
+      <div class="cta-card reveal">
+        <div class="cta-card__content">
+          <h2>开始你的提分闭环</h2>
+          <p>30 分钟完成轻量诊断，AI 为你匹配 Tier 等级并生成今日训练计划</p>
+          <div class="cta-card__actions">
+            <a href="dashboard.html" class="btn btn--cta btn--large magnetic" data-magnetic>
+              免费开始体验
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+            </a>
+            <a href="https://github.com/Richard-LLLL/dr-ielts" class="btn btn--ghost btn--large" target="_blank" rel="noopener">
+              <svg viewBox="0 0 24 24" fill="currentColor" width="18" height="18"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+              Star on GitHub
+            </a>
+          </div>
+        </div>
+        <div class="cta-card__visual">
+          <div class="cta-mini-loop">
+            <div class="cta-mini-loop__step is-active">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>
+              <span>诊断</span>
+            </div>
+            <div class="cta-mini-loop__arrow">→</div>
+            <div class="cta-mini-loop__step">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 3h5a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-5a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+              <span>训练</span>
+            </div>
+            <div class="cta-mini-loop__arrow">→</div>
+            <div class="cta-mini-loop__step">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4"/></svg>
+              <span>反馈</span>
+            </div>
+            <div class="cta-mini-loop__arrow">→</div>
+            <div class="cta-mini-loop__step">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 4v6h-6"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+              <span>再诊断</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="container">
+      <div class="footer__grid">
+        <div class="footer__brand">
+          <div class="footer__logo">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="28" height="28">
+              <path d="M12 2L2 7l10 5 10-5-10-5z"/>
+              <path d="M2 17l10 5 10-5"/>
+              <path d="M2 12l10 5 10-5"/>
+            </svg>
+            <span>Dr. IELTS</span>
+          </div>
+          <p class="footer__slogan">数据驱动的 AI 雅思教练<br>诊断 → 训练 → 反馈 → 再诊断</p>
+          <div class="footer__badges">
+            <span class="footer__badge">开源</span>
+            <span class="footer__badge">Local First</span>
+            <span class="footer__badge">多 LLM</span>
+          </div>
+        </div>
+
+        <div class="footer__col">
+          <h5>产品</h5>
+          <a href="#workflow">提分闭环</a>
+          <a href="#agents">业务 Agent</a>
+          <a href="#features">Tier 体系</a>
+          <a href="#opensource">题库</a>
+        </div>
+
+        <div class="footer__col">
+          <h5>资源</h5>
+          <a href="https://github.com/Richard-LLLL/dr-ielts" target="_blank" rel="noopener">GitHub</a>
+          <a href="https://github.com/Richard-LLLL/dr-ielts/blob/main/README.md" target="_blank" rel="noopener">文档</a>
+          <a href="https://github.com/Richard-LLLL/dr-ielts/issues" target="_blank" rel="noopener">问题反馈</a>
+          <a href="dashboard.html">开始使用</a>
+        </div>
+
+        <div class="footer__col">
+          <h5>技术</h5>
+          <a href="#opensource">技术栈</a>
+          <a href="#agents">Agent 架构</a>
+          <a href="#workflow">LangGraph 工作流</a>
+          <a href="#opensource">ExamPlugin 扩展</a>
+        </div>
+      </div>
+
+      <div class="footer__bottom">
+        <p>Dr. IELTS — 开源的 AI 雅思学习系统 · 用数据驱动提分</p>
+        <p class="footer__copyright">Built with LangGraph + FastAPI · MIT License</p>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+// Dr. IELTS Landing Page - Interactive Features
+
+// Smooth scroll for navigation links
+document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+  anchor.addEventListener('click', function (e) {
+    e.preventDefault();
+    const target = document.querySelector(this.getAttribute('href'));
+    if (target) {
+      target.scrollIntoView({
+        behavior: 'smooth',
+        block: 'start'
+      });
+    }
+  });
+});
+
+// Navigation background on scroll
+const nav = document.querySelector('.nav');
+let lastScroll = 0;
+
+window.addEventListener('scroll', () => {
+  const currentScroll = window.pageYOffset;
+
+  if (currentScroll > 100) {
+    nav.style.boxShadow = '0 2px 8px rgba(0, 0, 0, 0.04)';
+  } else {
+    nav.style.boxShadow = 'none';
+  }
+
+  lastScroll = currentScroll;
+});
+
+// Magnetic effect for primary CTA buttons
+const magneticButtons = document.querySelectorAll('[data-magnetic]');
+
+magneticButtons.forEach(button => {
+  button.addEventListener('mousemove', (e) => {
+    const rect = button.getBoundingClientRect();
+    const x = e.clientX - rect.left - rect.width / 2;
+    const y = e.clientY - rect.top - rect.height / 2;
+
+    const moveX = x * 0.15;
+    const moveY = y * 0.15;
+
+    button.style.transform = `translate(${moveX}px, ${moveY}px)`;
+  });
+
+  button.addEventListener('mouseleave', () => {
+    button.style.transform = 'translate(0, 0)';
+  });
+});
+
+// Copy to clipboard functionality
+const copyButtons = document.querySelectorAll('.ai-intro__copy');
+
+copyButtons.forEach(button => {
+  button.addEventListener('click', async () => {
+    const codeElement = button.parentElement.querySelector('code');
+    const textToCopy = codeElement.textContent;
+
+    try {
+      await navigator.clipboard.writeText(textToCopy);
+
+      // Visual feedback
+      const originalHTML = button.innerHTML;
+      button.innerHTML = `
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
+          <path d="M20 6L9 17l-5-5"/>
+        </svg>
+      `;
+      button.style.color = '#1a73e8';
+
+      setTimeout(() => {
+        button.innerHTML = originalHTML;
+        button.style.color = '';
+      }, 2000);
+    } catch (err) {
+      console.error('Failed to copy:', err);
+    }
+  });
+});
+
+// Chat demo auto-play animation
+const chatMessages = document.getElementById('chatMessages');
+const messages = [
+  {
+    type: 'ai',
+    text: '你好！我是 Dr. IELTS。我看到你最近的写作练习中，Task Response 维度得分较低。'
+  },
+  {
+    type: 'ai',
+    text: '建议你先完成一篇 Task 2 议论文，我会从 4 个维度为你评分，并给出具体的改进建议。'
+  },
+  {
+    type: 'user',
+    text: '好的，我现在开始写'
+  },
+  {
+    type: 'ai',
+    text: '很好！记得在写作时注意：\n1. 明确表达观点\n2. 使用恰当的连接词\n3. 保持段落结构清晰'
+  },
+  {
+    type: 'user',
+    text: '写完了，帮我看看'
+  },
+  {
+    type: 'ai',
+    text: '好的，我已经完成了评分。你的 Task Response 得分 6.5，Coherence & Cohesion 得分 7.0。主要问题在于观点展开不够充分...'
+  }
+];
+
+let messageIndex = 0;
+let isPlaying = false;
+
+function playChatAnimation() {
+  if (isPlaying || messageIndex >= messages.length) return;
+  isPlaying = true;
+
+  // Clear existing messages
+  chatMessages.innerHTML = '';
+
+  // Show typing indicator
+  const typingIndicator = document.createElement('div');
+  typingIndicator.className = 'chat-message chat-message--ai chat-message--typing';
+  typingIndicator.innerHTML = `
+    <div class="chat-message__content">
+      <span class="typing-dot"></span>
+      <span class="typing-dot"></span>
+      <span class="typing-dot"></span>
+    </div>
+  `;
+  chatMessages.appendChild(typingIndicator);
+
+  // Show messages one by one
+  let currentIndex = 0;
+  const showNextMessage = () => {
+    if (currentIndex >= messages.length) {
+      isPlaying = false;
+      messageIndex = 0;
+      return;
+    }
+
+    // Remove typing indicator
+    if (typingIndicator.parentNode) {
+      typingIndicator.remove();
+    }
+
+    const message = messages[currentIndex];
+    const messageEl = document.createElement('div');
+    messageEl.className = `chat-message chat-message--${message.type}`;
+    messageEl.innerHTML = `
+      <div class="chat-message__content">
+        <p>${message.text.replace(/\n/g, '<br>')}</p>
+      </div>
+    `;
+    chatMessages.appendChild(messageEl);
+
+    // Scroll chat container internally (avoid scrolling the whole page)
+    chatMessages.scrollTop = chatMessages.scrollHeight;
+
+    currentIndex++;
+
+    // Show typing indicator before next AI message
+    if (currentIndex < messages.length && messages[currentIndex].type === 'ai') {
+      setTimeout(() => {
+        chatMessages.appendChild(typingIndicator);
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+      }, 800);
+    }
+
+    setTimeout(showNextMessage, message.type === 'ai' ? 2000 : 1500);
+  };
+
+  setTimeout(showNextMessage, 1000);
+}
+
+// Intersection Observer for animations
+const observerOptions = {
+  threshold: 0.1,
+  rootMargin: '0px 0px -100px 0px'
+};
+
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      entry.target.classList.add('reveal');
+
+      // Trigger chat animation when hero is visible
+      if (entry.target.classList.contains('hero__visual')) {
+        setTimeout(playChatAnimation, 1000);
+      }
+    }
+  });
+}, observerOptions);
+
+// Observe all reveal elements
+document.querySelectorAll('.reveal').forEach(el => {
+  observer.observe(el);
+});
+
+// Parallax effect for floating cards
+let ticking = false;
+
+window.addEventListener('scroll', () => {
+  if (!ticking) {
+    window.requestAnimationFrame(() => {
+      const scrolled = window.pageYOffset;
+      const parallaxElements = document.querySelectorAll('.hero__floating');
+
+      parallaxElements.forEach((el, index) => {
+        const speed = 0.5 + (index * 0.1);
+        const yPos = -(scrolled * speed);
+        el.style.transform = `translateY(${yPos}px)`;
+      });
+
+      ticking = false;
+    });
+
+    ticking = true;
+  }
+});
+
+// Auto-play chat animation every 20 seconds
+setInterval(() => {
+  if (document.visibilityState === 'visible') {
+    playChatAnimation();
+  }
+}, 20000);
+
+// Initialize on load
+window.addEventListener('load', () => {
+  // Add loaded class to body for CSS transitions
+  document.body.classList.add('loaded');
+
+  // Start chat animation after a delay
+  setTimeout(playChatAnimation, 2000);
+});
+
+// ============================================
+// Agent 卡片单选切换
+// ============================================
+document.querySelectorAll('.agent-card').forEach(card => {
+  card.addEventListener('click', () => {
+    // 移除所有卡片的选中态
+    document.querySelectorAll('.agent-card.is-active').forEach(c => c.classList.remove('is-active'));
+    // 当前卡片选中
+    card.classList.add('is-active');
+  });
+});
+
+// ============================================
+// Tier 卡片单选切换 + 进度条联动
+// ============================================
+const tierProgressFill = document.querySelector('.tiers-progress__fill');
+
+document.querySelectorAll('.tier-card').forEach(card => {
+  card.addEventListener('click', () => {
+    // 移除所有卡片的选中态
+    document.querySelectorAll('.tier-card.is-active').forEach(c => c.classList.remove('is-active'));
+    // 当前卡片选中
+    card.classList.add('is-active');
+
+    // 进度条移动到对应位置
+    const progress = card.dataset.progress || 0;
+    if (tierProgressFill) {
+      tierProgressFill.style.width = `${progress}%`;
+    }
+  });
+});
+
+</script>
+</body>
+</html>
